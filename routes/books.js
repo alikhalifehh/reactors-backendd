@@ -4,6 +4,36 @@ import auth from "../middleware/auth.js";
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * /api/books:
+ *   post:
+ *     summary: Create a new book
+ *     tags: [Books]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               author:
+ *                 type: string
+ *               genre:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               coverImage:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Book created successfully
+ */
+
 // CREATE BOOK (authenticated)
 router.post("/", auth, async (req, res) => {
   try {

@@ -5,6 +5,7 @@ import cors from "cors";
 import authRoutes from "./routes/auth.js";
 import bookRoutes from "./routes/books.js";
 import userBookRoutes from "./routes/userbooks.js";
+import { swaggerSpec, swaggerUiServe, swaggerUiSetup } from "./swagger.js";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ mongoose
 app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/userbooks", userBookRoutes);
+app.use("/api-docs", swaggerUiServe, swaggerUiSetup(swaggerSpec));
 
 app.get("/", (req, res) => {
   res.send("API is running...");
