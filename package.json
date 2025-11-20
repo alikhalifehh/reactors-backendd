@@ -27,7 +27,8 @@
     "nodemailer": "^7.0.10",
     "nodemon": "^3.1.11",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
   },
   "scripts": {
     "dev": "nodemon server.js",

@@ -1,28 +1,12 @@
-import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
+import YAML from "yamljs";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const options = {
-  definition: {
-    openapi: "3.0.0",
-    info: {
-      title: "Reactors API Documentation",
-      version: "1.0.0",
-      description: "API documentation for the Reactors Book Tracker project",
-    },
-    servers: [{ url: "http://localhost:5000" }],
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT",
-        },
-      },
-    },
-  },
-  apis: ["./routes/*.js"],
-};
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-export const swaggerSpec = swaggerJsDoc(options);
+const swaggerDocument = YAML.load(path.join(__dirname, "swagger.yaml"));
+
 export const swaggerUiServe = swaggerUi.serve;
-export const swaggerUiSetup = swaggerUi.setup;
+export const swaggerUiSetup = swaggerUi.setup(swaggerDocument);

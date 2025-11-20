@@ -235,33 +235,7 @@ router.post("/resend-otp", async (req, res) => {
   }
 });
 
-// REGISTER
-/**
- * @swagger
- * /api/auth/register:
- *   post:
- *     summary: Register a new user
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *     responses:
- *       201:
- *         description: User registered successfully
- *       400:
- *         description: Email already registered
- */
-
+// regisyer
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -376,31 +350,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// LOGIN
-/**
- * @swagger
- * /api/auth/login:
- *   post:
- *     summary: Login a user
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *     responses:
- *       200:
- *         description: Login successful
- *       400:
- *         description: Invalid email or password
- */
-
+// login
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -444,17 +394,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// LOGOUT
-/**
- * @swagger
- * /api/auth/logout:
- *   post:
- *     summary: Log out the current user
- *     tags: [Auth]
- *     responses:
- *       200:
- *         description: Logged out successfully
- */
+// logout
 router.post("/logout", (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,

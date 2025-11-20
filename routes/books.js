@@ -4,37 +4,7 @@ import auth from "../middleware/auth.js";
 
 const router = express.Router();
 
-/**
- * @swagger
- * /api/books:
- *   post:
- *     summary: Create a new book
- *     tags: [Books]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               title:
- *                 type: string
- *               author:
- *                 type: string
- *               genre:
- *                 type: string
- *               description:
- *                 type: string
- *               coverImage:
- *                 type: string
- *     responses:
- *       201:
- *         description: Book created successfully
- */
-
-// CREATE BOOK
+// create book
 router.post("/", auth, async (req, res) => {
   try {
     const { title, author, description, genre } = req.body;
@@ -67,18 +37,7 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
-// GET ALL BOOKS
-/**
- * @swagger
- * /api/books:
- *   get:
- *     summary: Get all books
- *     tags: [Books]
- *     responses:
- *       200:
- *         description: List of all books
- */
-
+// get all books
 router.get("/", async (req, res) => {
   try {
     const books = await Book.find().sort({ createdAt: -1 });
@@ -106,25 +65,6 @@ router.get("/mine", auth, async (req, res) => {
 });
 
 // get single book
-/**
- * @swagger
- * /api/books/{id}:
- *   get:
- *     summary: Get a book by ID
- *     tags: [Books]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Book data
- *       404:
- *         description: Book not found
- */
-
 router.get("/:id", async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
@@ -137,28 +77,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/books/{id}:
- *   put:
- *     summary: Update a book (creator only)
- *     tags: [Books]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *     responses:
- *       200:
- *         description: Book updated
- *       403:
- *         description: Unauthorized
- *       404:
- *         description: Book not found
- */
-
-// UPDATE BOOK
+// update book
 router.put("/:id", auth, async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
@@ -189,28 +108,7 @@ router.put("/:id", auth, async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/books/{id}:
- *   delete:
- *     summary: Delete a book (creator only)
- *     tags: [Books]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *     responses:
- *       200:
- *         description: Book deleted
- *       403:
- *         description: Unauthorized
- *       404:
- *         description: Book not found
- */
-
-// DELETE BOOK
+// delete book
 router.delete("/:id", auth, async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);

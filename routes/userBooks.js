@@ -4,34 +4,7 @@ import auth from "../middleware/auth.js";
 
 const router = express.Router();
 
-// ADD BOOK TO USER LIST (wishlist / reading / finished)
-/**
- * @swagger
- * /api/userbooks:
- *   post:
- *     summary: Add a book to the user's reading list
- *     tags: [UserBooks]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               bookId:
- *                 type: string
- *               status:
- *                 type: string
- *                 enum: [wishlist, reading, finished]
- *     responses:
- *       201:
- *         description: Entry created
- *       400:
- *         description: Already in list
- */
-
+// add book to reading list
 router.post("/", auth, async (req, res) => {
   try {
     const { bookId, status, progress, rating, notes } = req.body;
@@ -140,20 +113,7 @@ router.get("/summary", auth, async (req, res) => {
   }
 });
 
-// GET ALL BOOKS FOR LOGGED-IN USER
-/**
- * @swagger
- * /api/userbooks:
- *   get:
- *     summary: Get all books in the user's reading list
- *     tags: [UserBooks]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: User's book entries returned
- */
-
+// Get all books from logged in user
 router.get("/", auth, async (req, res) => {
   try {
     const list = await UserBook.find({ user: req.user.id })
@@ -166,28 +126,7 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-// UPDATE USERBOOK ENTRY
-/**
- * @swagger
- * /api/userbooks/{id}:
- *   put:
- *     summary: Update progress, status, or notes for a userbook entry
- *     tags: [UserBooks]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *     responses:
- *       200:
- *         description: Entry updated
- *       403:
- *         description: Unauthorized
- *       404:
- *         description: Entry not found
- */
-
+// update user book entry
 router.put("/:id", auth, async (req, res) => {
   try {
     const entry = await UserBook.findById(req.params.id);
@@ -236,26 +175,7 @@ router.put("/:id", auth, async (req, res) => {
   }
 });
 
-// DELETE FROM USER LIST
-/**
- * @swagger
- * /api/userbooks/{id}:
- *   delete:
- *     summary: Remove a book from the user's list
- *     tags: [UserBooks]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *     responses:
- *       200:
- *         description: Entry removed
- *       404:
- *         description: Entry not found
- */
-
+// delete from usre list
 router.delete("/:id", auth, async (req, res) => {
   try {
     const entry = await UserBook.findById(req.params.id);
