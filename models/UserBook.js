@@ -20,14 +20,39 @@ const userBookSchema = new mongoose.Schema(
       default: "wishlist",
     },
 
-    progress: { type: Number, default: 0 },
-    rating: { type: Number, min: 1, max: 5 },
-    notes: { type: String },
+    progress: {
+      type: Number,
+      min: 0,
+      max: 100,
+      default: 0,
+    },
 
-    startedAt: { type: Date },
-    finishedAt: { type: Date },
+    rating: {
+      type: Number,
+      min: 1,
+      max: 5,
+      default: null,
+    },
+
+    notes: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    startedAt: {
+      type: Date,
+      default: null,
+    },
+
+    finishedAt: {
+      type: Date,
+      default: null,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
 export default mongoose.model("UserBook", userBookSchema);

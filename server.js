@@ -14,37 +14,41 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+
+// Parse JSON bodies
 app.use(express.json());
+
+// Parse cookies from incoming requests
 app.use(cookieParser());
 
+// Allow the React frontend to talk to this API with cookies
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: FRONTEND_URL,
     credentials: true,
   })
 );
 
-// Database
+// Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log("MongoDB Error:", err));
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB error:", err.message));
 
-// Routes
+// API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/userbooks", userBookRoutes);
 
-// Swagger
+// Swagger docs
 app.use("/api-docs", swaggerUiServe, swaggerUiSetup);
 
-// Root
+// Simple root route
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
-// Server
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

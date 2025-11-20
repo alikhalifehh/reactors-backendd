@@ -1,6 +1,7 @@
 import express from "express";
 import UserBook from "../models/UserBook.js";
 import auth from "../middleware/auth.js";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
@@ -66,13 +67,21 @@ router.post("/", auth, async (req, res) => {
 });
 
 // get reading list summary
+// get reading list summary
 router.get("/summary", auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const rawId = req.user.id || req.user._id;
+
+    if (!rawId) {
+      return res
+        .status(400)
+        .json({ message: "Cannot determine current user id" });
+    }
+
+    const userObjectId = new mongoose.Types.ObjectId(rawId.toString());
 
     const summary = await UserBook.aggregate([
-      { $match: { user: new mongoose.Types.ObjectId(userId) } },
-
+      { $match: { user: userObjectId } },
       {
         $group: {
           _id: null,
@@ -85,9 +94,6 @@ router.get("/summary", auth, async (req, res) => {
           finished: {
             $sum: { $cond: [{ $eq: ["$status", "finished"] }, 1, 0] },
           },
-          avgRating: { $avg: "$rating" },
-          totalProgress: { $sum: "$progress" },
-          lastUpdated: { $max: "$updatedAt" },
         },
       },
     ]);
@@ -96,20 +102,14 @@ router.get("/summary", auth, async (req, res) => {
       wishlist: 0,
       reading: 0,
       finished: 0,
-      avgRating: null,
-      totalProgress: 0,
-      lastUpdated: null,
     };
 
-    return res.json({
-      message: "Reading list summary retrieved successfully",
-      summary: result,
-    });
+    return res.json({ summary: result });
   } catch (err) {
-    return res.status(500).json({
-      message: "Server Error",
-      error: err.message,
-    });
+    console.error("Error in /userbooks/summary:", err);
+    return res
+      .status(500)
+      .json({ message: "Server Error", error: err.message });
   }
 });
 
