@@ -7,7 +7,11 @@ const bookSchema = new mongoose.Schema(
     genre: { type: String },
     description: { type: String },
     coverImage: { type: String },
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   { timestamps: true }
 );

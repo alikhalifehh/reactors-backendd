@@ -12,7 +12,19 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+
+app.use(express.json());
+app.use(cookieParser());
+
+app.use(
+  cors({
+    origin: "http://localhost:5173", // your Vite frontend URL
+    credentials: true, // allow cookies
+  })
+);
+
+import cookieParser from "cookie-parser";
+app.use(cookieParser());
 
 mongoose
   .connect(process.env.MONGO_URI)
@@ -31,5 +43,5 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

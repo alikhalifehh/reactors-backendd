@@ -9,13 +9,18 @@ const options = {
       version: "1.0.0",
       description: "API documentation for the Reactors Book Tracker project",
     },
-    servers: [
-      {
-        url: "http://localhost:5000",
+    servers: [{ url: "http://localhost:5000" }],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
       },
-    ],
+    },
   },
-  apis: ["./routes/*.js"], // <--- Swagger reads comments from here
+  apis: ["./routes/*.js"],
 };
 
 export const swaggerSpec = swaggerJsDoc(options);
