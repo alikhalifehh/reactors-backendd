@@ -11,7 +11,7 @@ const router = express.Router();
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
-// Google login: send the user to Google's login page
+// google login start
 router.get("/google", (req, res) => {
   const params = querystring.stringify({
     client_id: process.env.GOOGLE_CLIENT_ID,
@@ -28,13 +28,12 @@ router.get("/google", (req, res) => {
   res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);
 });
 
-// Google callback: Google redirects here after the user chooses an account
+// google callback
 router.get("/google/callback", async (req, res) => {
   try {
     const code = req.query.code;
     if (!code) return res.status(400).json({ message: "Missing Google code" });
 
-    // Exchange the code for an access token
     const tokenResponse = await axios.post(
       "https://oauth2.googleapis.com/token",
       {
@@ -50,7 +49,6 @@ router.get("/google/callback", async (req, res) => {
     if (!access_token)
       return res.status(400).json({ message: "Failed to get Google token" });
 
-    // Fetch Google profile
     const profileResponse = await axios.get(
       "https://www.googleapis.com/oauth2/v2/userinfo",
       { headers: { Authorization: `Bearer ${access_token}` } }
@@ -58,10 +56,8 @@ router.get("/google/callback", async (req, res) => {
 
     const { email, name, picture, id: googleId } = profileResponse.data;
 
-    // Check if user already exists
     let user = await User.findOne({ email });
 
-    // If new user, create a Google-based account
     if (!user) {
       user = await User.create({
         name,
@@ -74,12 +70,10 @@ router.get("/google/callback", async (req, res) => {
       });
     }
 
-    // Create JWT
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
 
-    // Save token in cookie
     res.cookie("token", token, {
       httpOnly: true,
       secure: false,
@@ -89,14 +83,13 @@ router.get("/google/callback", async (req, res) => {
 
     return res.redirect(FRONTEND_URL);
   } catch (err) {
-    console.error(err);
     return res
       .status(500)
       .json({ message: "Google login failed", error: err.message });
   }
 });
 
-// Verify OTP for email verification during registration
+// verify otp
 router.post("/verify-otp", async (req, res) => {
   try {
     const { userId, otp } = req.body;
@@ -108,7 +101,6 @@ router.post("/verify-otp", async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(400).json({ message: "User not found" });
 
-    // Handle lock after too many wrong attempts
     if (user.otpLockedUntil && user.otpLockedUntil > Date.now()) {
       return res
         .status(429)
@@ -134,7 +126,6 @@ router.post("/verify-otp", async (req, res) => {
       return res.status(400).json({ message: "Code expired" });
     }
 
-    // Mark email as verified and clear OTP fields
     user.tempOTP = null;
     user.otpExpires = null;
     user.otpAttempts = 0;
@@ -165,14 +156,13 @@ router.post("/verify-otp", async (req, res) => {
       },
     });
   } catch (err) {
-    console.error(err);
     return res
       .status(500)
       .json({ message: "Verification failed", error: err.message });
   }
 });
 
-// Resend verification code
+// resend otp
 router.post("/resend-otp", async (req, res) => {
   try {
     const { userId } = req.body;
@@ -205,12 +195,11 @@ router.post("/resend-otp", async (req, res) => {
   }
 });
 
-// Register with email and password (sends OTP)
+// register
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // Name validation
     const nameErrors = [];
     if (!name || name.trim().length < 2) nameErrors.push("Name too short");
     if (name.length > 30) nameErrors.push("Name too long");
@@ -222,25 +211,26 @@ router.post("/register", async (req, res) => {
         .json({ message: "Invalid name", errors: nameErrors });
     }
 
-    // Email validation
     const emailErrors = [];
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!emailRegex.test(email)) emailErrors.push("Invalid email format");
-    if (!email.endsWith("@example.com"))
-      emailErrors.push("Email must end with @example.com");
+    if (!emailRegex.test(email)) {
+      emailErrors.push("Invalid email format");
+    }
 
     if (emailErrors.length) {
-      return res
-        .status(400)
-        .json({ message: "Invalid email", errors: emailErrors });
+      return res.status(400).json({
+        message: "Invalid email",
+        errors: emailErrors,
+      });
     }
 
     if (await User.findOne({ email })) {
-      return res.status(400).json({ message: "Email already registered" });
+      return res.status(400).json({
+        message: "Email already registered",
+      });
     }
 
-    // Password validation
     const passwordErrors = [];
     if (password.length < 8) passwordErrors.push("Minimum length is 8");
     if (!/[A-Z]/.test(password)) passwordErrors.push("Needs uppercase letter");
@@ -250,9 +240,10 @@ router.post("/register", async (req, res) => {
       passwordErrors.push("Needs a special character");
 
     if (passwordErrors.length) {
-      return res
-        .status(400)
-        .json({ message: "Weak password", errors: passwordErrors });
+      return res.status(400).json({
+        message: "Weak password",
+        errors: passwordErrors,
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -265,6 +256,7 @@ router.post("/register", async (req, res) => {
       emailVerified: false,
     });
 
+    // generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     user.tempOTP = otp;
@@ -283,18 +275,195 @@ router.post("/register", async (req, res) => {
     await sendEmail(email, "Verification code", html);
 
     return res.json({
+      success: true,
+      mfa: true,
       message: "Verification code sent",
       email,
-      userId: user._id,
+      userId: user._id, // required
     });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ message: "Registration failed", error: err.message });
+    return res.status(500).json({
+      message: "Registration failed",
+      error: err.message,
+    });
   }
 });
 
-// Login with email and password
+// forgot password
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Email is required" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user)
+      return res
+        .status(400)
+        .json({ success: false, message: "No account found with this email" });
+
+    if (!user.password && user.authProvider === "google") {
+      return res.status(400).json({
+        success: false,
+        message: "This account uses Google login only",
+      });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    user.tempOTP = otp;
+    user.otpExpires = Date.now() + 5 * 60 * 1000;
+    user.otpAttempts = 0;
+    user.otpLockedUntil = null;
+
+    await user.save();
+
+    const html = `
+      <h2>Password reset code</h2>
+      <h1>${otp}</h1>
+      <p>This code expires in 5 minutes.</p>
+    `;
+
+    await sendEmail(email, "Password reset code", html);
+
+    return res.json({
+      success: true,
+      message: "Reset code sent",
+      userId: user._id,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Could not send reset code",
+      error: err.message,
+    });
+  }
+});
+
+// verify reset otp
+router.post("/verify-reset-otp", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing email or code" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user)
+      return res
+        .status(400)
+        .json({ success: false, message: "User not found" });
+
+    if (user.otpLockedUntil && user.otpLockedUntil > Date.now()) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many attempts, try again later",
+      });
+    }
+
+    if (user.tempOTP !== otp) {
+      user.otpAttempts += 1;
+
+      if (user.otpAttempts >= 5) {
+        user.otpLockedUntil = Date.now() + 5 * 60 * 1000;
+        await user.save();
+        return res.status(429).json({
+          success: false,
+          message: "Too many attempts, locked for 5 minutes",
+        });
+      }
+
+      await user.save();
+      return res
+        .status(400)
+        .json({ success: false, message: "Incorrect code" });
+    }
+
+    if (user.otpExpires < Date.now()) {
+      return res.status(400).json({ success: false, message: "Code expired" });
+    }
+
+    user.tempOTP = null;
+    user.otpExpires = null;
+    user.otpAttempts = 0;
+    user.otpLockedUntil = null;
+
+    await user.save();
+
+    return res.json({
+      success: true,
+      message: "Code verified",
+      userId: user._id,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Verification failed",
+      error: err.message,
+    });
+  }
+});
+
+// reset password
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { userId, newPassword } = req.body;
+
+    if (!userId || !newPassword) {
+      return res.status(400).json({ success: false, message: "Missing data" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user)
+      return res
+        .status(400)
+        .json({ success: false, message: "User not found" });
+
+    const passwordErrors = [];
+    if (newPassword.length < 8) passwordErrors.push("Minimum length is 8");
+    if (!/[A-Z]/.test(newPassword))
+      passwordErrors.push("Needs uppercase letter");
+    if (!/[a-z]/.test(newPassword))
+      passwordErrors.push("Needs lowercase letter");
+    if (!/\d/.test(newPassword)) passwordErrors.push("Needs a number");
+    if (!/[@$!%*?&]/.test(newPassword))
+      passwordErrors.push("Needs a special character");
+
+    if (passwordErrors.length) {
+      return res.status(400).json({
+        success: false,
+        message: "Weak password",
+        errors: passwordErrors,
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.authProvider = "local";
+
+    await user.save();
+
+    return res.json({
+      success: true,
+      message: "Password reset successful",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Password reset failed",
+      error: err.message,
+    });
+  }
+});
+
+// login
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -347,7 +516,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Logout by clearing the cookie
+// logout
 router.post("/logout", (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
@@ -358,7 +527,7 @@ router.post("/logout", (req, res) => {
   return res.json({ message: "Logged out successfully" });
 });
 
-// Get the currently logged-in user
+// me
 router.get("/me", auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select(

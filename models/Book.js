@@ -27,7 +27,7 @@ const bookSchema = new mongoose.Schema(
     pages: { type: Number, default: null },
     publishedYear: { type: Number, default: null },
 
-    coverUrl: {
+    coverImage: {
       type: String,
       default: null,
     },

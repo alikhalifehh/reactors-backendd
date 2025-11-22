@@ -16,6 +16,8 @@ const app = express();
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
+app.set("trust proxy", 1);
+
 // Parse JSON bodies
 app.use(express.json());
 
@@ -25,7 +27,7 @@ app.use(cookieParser());
 // Allow the React frontend to talk to this API with cookies
 app.use(
   cors({
-    origin: FRONTEND_URL,
+    origin: [FRONTEND_URL, "http://127.0.0.1:5173"],
     credentials: true,
   })
 );
