@@ -544,4 +544,21 @@ router.get("/me", auth, async (req, res) => {
   }
 });
 
+// get user by id
+router.get("/user/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select(
+      "name email profilePic authProvider"
+    );
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    return res.json({ user });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: "Could not fetch user", error: err.message });
+  }
+});
+
 export default router;
