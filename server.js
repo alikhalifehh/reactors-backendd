@@ -6,7 +6,7 @@ import cookieParser from "cookie-parser";
 
 import authRoutes from "./routes/auth.js";
 import bookRoutes from "./routes/books.js";
-import userBookRoutes from "./routes/userbooks.js";
+import userBookRoutes from "./routes/userBooks.js";
 
 import { swaggerUiServe, swaggerUiSetup } from "./swagger.js";
 
