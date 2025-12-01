@@ -89,6 +89,13 @@ router.get("/google/callback", async (req, res) => {
   }
 });
 
+router.get("/test-env", (req, res) => {
+  res.json({
+    redirect_uri: process.env.REDIRECT_URI,
+    all_env: process.env,
+  });
+});
+
 // verify otp
 router.post("/verify-otp", async (req, res) => {
   try {
