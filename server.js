@@ -14,20 +14,22 @@ dotenv.config();
 
 const app = express();
 
+// frontend url
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
 app.set("trust proxy", 1);
 
-// Parse JSON bodies
+// Middlewares
 app.use(express.json());
-
-// Parse cookies from incoming requests
 app.use(cookieParser());
 
-// Allow the React frontend to talk to this API with cookies
+// CORS configuration
 app.use(
   cors({
-    origin: [FRONTEND_URL, "http://127.0.0.1:5173"],
+    origin: [
+      "http://localhost:5173",
+      "https://chic-hummingbird-00675d.netlify.app",
+    ],
     credentials: true,
   })
 );
@@ -46,11 +48,12 @@ app.use("/api/userbooks", userBookRoutes);
 // Swagger docs
 app.use("/api-docs", swaggerUiServe, swaggerUiSetup);
 
-// Simple root route
+// Root route
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
+// PORT for Render
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
