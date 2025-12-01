@@ -26,10 +26,7 @@ app.use(cookieParser());
 // CORS configuration
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://chic-hummingbird-00675d.netlify.app",
-    ],
+    origin: ["http://localhost:5173", "https://reactors-4x5p.vercel.app"],
     credentials: true,
   })
 );
