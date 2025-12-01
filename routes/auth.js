@@ -15,7 +15,7 @@ const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 router.get("/google", (req, res) => {
   const params = querystring.stringify({
     client_id: process.env.GOOGLE_CLIENT_ID,
-    redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+    redirect_uri: process.env.GOOGLE_CALLBACK_URI,
     response_type: "code",
     scope: [
       "https://www.googleapis.com/auth/userinfo.email",
@@ -39,7 +39,7 @@ router.get("/google/callback", async (req, res) => {
       {
         client_id: process.env.GOOGLE_CLIENT_ID,
         client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+        redirect_uri: process.env.GOOGLE_CALLBACK_URI,
         grant_type: "authorization_code",
         code,
       }
