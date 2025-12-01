@@ -14,6 +14,12 @@ const userBookSchema = new mongoose.Schema(
       required: true,
     },
 
+    // ⭐ ADD THIS FIELD ⭐
+    coverImage: {
+      type: String,
+      default: null,
+    },
+
     status: {
       type: String,
       enum: ["wishlist", "reading", "finished"],
@@ -50,9 +56,7 @@ const userBookSchema = new mongoose.Schema(
       default: null,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 export default mongoose.model("UserBook", userBookSchema);

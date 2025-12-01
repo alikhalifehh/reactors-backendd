@@ -8,8 +8,8 @@ const router = express.Router();
 // add book to reading list
 router.post("/", auth, async (req, res) => {
   try {
-    const { bookId, status, progress, rating, notes } = req.body;
-
+    const { bookId, status, progress, rating, notes, coverImage } = req.body;
+    coverImage: { type: String };
     // validate book
     if (!bookId) {
       return res.status(400).json({ message: "Book ID is required" });
@@ -51,6 +51,7 @@ router.post("/", auth, async (req, res) => {
     const entry = await UserBook.create({
       user: req.user.id,
       book: bookId,
+      coverImage,
       status: status || "wishlist",
       progress: progress || 0,
       rating: rating || undefined,
