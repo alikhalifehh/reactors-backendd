@@ -568,15 +568,18 @@ router.get("/user/:id", async (req, res) => {
   }
 });
 
-router.get("/cookie-test", (req, res) => {
-  res.cookie("reactors_test_cookie", "test", {
+router.get("/auth/cookie-test", (req, res) => {
+  res.cookie("reactors_test_cookie", "yes", {
     httpOnly: false,
     secure: true,
-    sameSite: "None",
-    maxAge: 60 * 1000, // 1 minute
+    sameSite: "none",
   });
-
   res.json({ ok: true });
+});
+
+router.get("/auth/cookie-verify", (req, res) => {
+  const exists = req.cookies?.reactors_test_cookie === "yes";
+  res.json({ cookieWorks: exists });
 });
 
 export default router;
