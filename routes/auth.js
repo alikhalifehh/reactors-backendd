@@ -568,4 +568,15 @@ router.get("/user/:id", async (req, res) => {
   }
 });
 
+router.get("/cookie-test", (req, res) => {
+  res.cookie("reactors_test_cookie", "test", {
+    httpOnly: false,
+    secure: true,
+    sameSite: "None",
+    maxAge: 60 * 1000, // 1 minute
+  });
+
+  res.json({ ok: true });
+});
+
 export default router;
