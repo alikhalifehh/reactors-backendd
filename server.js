@@ -23,6 +23,11 @@ app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cookieParser());
 
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Credentials", "true");
+  next();
+});
+
 // CORS configuration
 app.use(
   cors({
